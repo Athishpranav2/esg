@@ -65,8 +65,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 max-w-[1400px]">
-      {/* Page Title */}
-      <div className="flex items-center justify-between">
+      {/* Page Title & Global Search */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
             ESG Performance Overview
@@ -75,8 +75,26 @@ export default function DashboardPage() {
             Comprehensive ESG benchmarks from India&apos;s top listed companies · BRSR FY 2024–25
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-[#00d4aa]/10 text-[#00d4aa] border border-[#00d4aa]/20">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
+          {/* Quick Search */}
+          <div className="relative w-full md:w-64">
+            <input
+              type="text"
+              placeholder="Search 1,000+ companies..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border-primary)] text-[var(--color-text-primary)] text-sm focus:border-[#00d4aa]/40 outline-none"
+              onClick={(e) => {
+                e.preventDefault();
+                // We'll rely on a Link wrapping this or trigger navigation manually
+                window.location.href = '/search';
+              }}
+              readOnly
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-text-muted)]"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </span>
+          </div>
+          
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-[#00d4aa]/10 text-[#00d4aa] border border-[#00d4aa]/20 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00d4aa] pulse-dot" />
             Live Data
           </span>
