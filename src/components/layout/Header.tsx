@@ -37,24 +37,37 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
       return;
     }
     const q = query.toLowerCase();
+    const scoreMatch = (name: string, ticker: string) => {
+      const n = name.toLowerCase();
+      const t = ticker.toLowerCase();
+      if (n === q || t === q) return 3;
+      if (n.startsWith(q) || t.startsWith(q)) return 2;
+      if (n.includes(q) || t.includes(q)) return 1;
+      return 0;
+    };
+
     const sectorResults: SearchResult[] = sectors
-      .filter(s => s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q))
+      .map(s => ({ s, scoreMatch: scoreMatch(s.name, s.code) }))
+      .filter(x => x.scoreMatch > 0)
+      .sort((a, b) => b.scoreMatch - a.scoreMatch)
       .slice(0, 3)
-      .map(s => ({
+      .map(x => ({
         type: 'sector' as const,
-        title: s.name,
-        subtitle: `${s.companyCount} companies · ${s.code}`,
-        href: `/sectors/${s.slug}`,
+        title: x.s.name,
+        subtitle: `${x.s.companyCount} companies · ${x.s.code}`,
+        href: `/sectors/${x.s.slug}`,
       }));
 
     const companyResults: SearchResult[] = companies
-      .filter(c => c.name.toLowerCase().includes(q) || c.ticker.toLowerCase().includes(q))
-      .slice(0, 4)
-      .map(c => ({
+      .map(c => ({ c, scoreMatch: scoreMatch(c.name, c.ticker) }))
+      .filter(x => x.scoreMatch > 0)
+      .sort((a, b) => b.scoreMatch - a.scoreMatch)
+      .slice(0, 8)
+      .map(x => ({
         type: 'company' as const,
-        title: c.name,
-        subtitle: `${c.ticker} · ESG Score: ${c.esgScore}`,
-        href: `/companies/${c.slug}`,
+        title: x.c.name,
+        subtitle: `${x.c.ticker} · ESG Score: ${x.c.esgScore}`,
+        href: `/companies/${x.c.slug}`,
       }));
 
     const metricOptions = [

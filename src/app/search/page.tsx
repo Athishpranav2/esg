@@ -45,20 +45,37 @@ function SearchContent() {
     if (!query.trim()) return { sectors: [], metrics: [], companies: [] };
     const q = query.toLowerCase();
 
+    // Sort function: exact match > starts with > includes
+    const scoreMatch = (name: string, ticker: string, description: string) => {
+      const n = name.toLowerCase();
+      const t = ticker.toLowerCase();
+      const d = description.toLowerCase();
+      if (n === q || t === q) return 3;
+      if (n.startsWith(q) || t.startsWith(q)) return 2;
+      if (n.includes(q) || t.includes(q) || d.includes(q)) return 1;
+      return 0;
+    };
+
     const matchedSectors = sectors
-      .filter(s => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q) || s.code.toLowerCase().includes(q))
-      .map(s => ({
-        ...s,
-        score: currentScores.find(sc => sc.sectorId === s.id),
-      }));
+      .map(s => ({ s, scoreMatch: scoreMatch(s.name, s.code, s.description) }))
+      .filter(x => x.scoreMatch > 0)
+      .sort((a, b) => b.scoreMatch - a.scoreMatch)
+      .map(x => ({
+        ...x.s,
+        score: currentScores.find(sc => sc.sectorId === x.s.id),
+      }))
+      .slice(0, 20); // Cap at 20
 
-    const matchedCompanies = companies.filter(
-      c => c.name.toLowerCase().includes(q) || c.ticker.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
-    );
+    const matchedCompanies = companies
+      .map(c => ({ c, scoreMatch: scoreMatch(c.name, c.ticker, c.description) }))
+      .filter(x => x.scoreMatch > 0)
+      .sort((a, b) => b.scoreMatch - a.scoreMatch)
+      .map(x => x.c)
+      .slice(0, 50); // Cap at 50
 
-    const matchedMetrics = esgMetrics.filter(
-      m => m.name.toLowerCase().includes(q) || m.code.toLowerCase().includes(q) || m.description.toLowerCase().includes(q) || m.pillar.toLowerCase().includes(q)
-    );
+    const matchedMetrics = esgMetrics
+      .filter(m => m.name.toLowerCase().includes(q) || m.code.toLowerCase().includes(q) || m.description.toLowerCase().includes(q) || m.pillar.toLowerCase().includes(q))
+      .slice(0, 10);
 
     return { sectors: matchedSectors, metrics: matchedMetrics, companies: matchedCompanies };
   }, [query, currentScores]);
